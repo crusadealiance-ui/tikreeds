@@ -3,73 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloader Anti-Blokir</title>
+    <title>Downloader Fix</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111827; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #1f2937; padding: 30px; border-radius: 20px; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body { font-family: sans-serif; background: #111827; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1f2937; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
         input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #374151; background: #111827; color: white; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        button:disabled { background: #374151; }
-        #loader { display: none; margin-top: 15px; color: #fbbf24; font-size: 14px; }
-        #result { display: none; margin-top: 20px; padding: 15px; background: #374151; border-radius: 10px; }
-        .dl-button { display: block; background: #10b981; color: white; padding: 10px; text-decoration: none; border-radius: 8px; margin-top: 10px; font-weight: bold; }
+        button:disabled { background: #374151; opacity: 0.6; }
+        #status { margin-top: 15px; color: #fbbf24; display: none; }
+        #hasil { display: none; margin-top: 20px; }
+        .btn-dl { display: block; background: #10b981; color: white; padding: 10px; text-decoration: none; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h2>Video Downloader</h2>
-    <p style="font-size: 12px; color: #9ca3af;">TikTok • IG • FB • YouTube</p>
-    
-    <input type="text" id="urlInput" placeholder="Tempel link video di sini...">
-    <button id="btnGas" onclick="ambilData()">PROSES VIDEO</button>
+    <input type="text" id="linkVideo" placeholder="Tempel link video di sini...">
+    <button id="btnProses" onclick="ambilVideo()">PROSES VIDEO</button>
 
-    <div id="loader">⏳ Menembus blokir... Mohon tunggu.</div>
+    <div id="status">Sedang memproses...</div>
 
-    <div id="result">
-        <span style="font-size: 14px;">✅ Video ditemukan!</span>
-        <a id="linkFinal" href="#" target="_blank" class="dl-button">SIMPAN VIDEO</a>
+    <div id="hasil">
+        <span>✅ Berhasil!</span>
+        <a id="linkDownload" href="#" target="_blank" class="btn-dl">DOWNLOAD SEKARANG</a>
     </div>
 </div>
 
 <script>
-async function ambilData() {
-    const urlInput = document.getElementById('urlInput').value;
-    const btn = document.getElementById('btnGas');
-    const loader = document.getElementById('loader');
-    const result = document.getElementById('result');
-    const linkFinal = document.getElementById('linkFinal');
+async function ambilVideo() {
+    // 1. Ambil elemen
+    const input = document.getElementById('linkVideo');
+    const btn = document.getElementById('btnProses');
+    const status = document.getElementById('status');
+    const hasil = document.getElementById('hasil');
+    const linkDownload = document.getElementById('linkDownload');
 
-    if (!urlInput) return alert("Masukkan link dulu bos!");
+    // 2. Validasi
+    if (!input.value) {
+        alert("Masukkan link video dulu!");
+        return;
+    }
 
-    // Set UI
+    // 3. UI Loading
     btn.disabled = true;
-    loader.style.display = "block";
-    result.style.display = "none";
-
-    // JEMBATAN (PROXY) UNTUK MENEMBUS ERROR 403 / CORS
-    // Kita gunakan proxy khusus agar Railway tidak memblokir koneksi
-    const proxyUrl = "https://api.allorigins.win/raw?url=";
-    const targetApi = "https://api.cobalt.tools/api/json";
+    btn.innerText = "SABAR...";
+    status.style.display = "block";
+    hasil.style.display = "none";
 
     try {
-        const response = await fetch(targetApi, {
+        // 4. Tembak API Cobalt
+        const response = await fetch("https://api.cobalt.tools/api/json", {
             method: "POST",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                url: urlInput,
+                url: input.value,
                 vQuality: "720"
             })
         });
 
-        // Jika fetch langsung gagal karena CORS, kita tidak bisa berbuat banyak di sisi Client
-        // Tapi Cobalt biasanya mengizinkan akses jika dari domain HTTPS yang valid (seperti Railway)
-        
         const data = await response.json();
 
+        // 5. Cek Hasil
         if (data.url) {
-            linkFinal.href = data.url;
-            result.style.display = "block";
+            linkDownload.href = data.url;
+            hasil.style.display = "block";
+            status.style.display = "none";
+        } else {
+            alert("Gagal: Link tidak didukung atau server sibuk.");
+        }
+
+    } catch (error) {
+        alert("Terjadi kesalahan koneksi ke server API.");
+        console.error(error);
+    } finally {
+        // 6. Kembalikan tombol
+        btn.disabled = false;
+        btn.innerText = "PROSES VIDEO";
+        status.style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>
