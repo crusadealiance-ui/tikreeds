@@ -1,89 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi Video Downloader</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Downloader</title>
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
 
-        h2 {
-            margin-bottom: 10px;
-        }
+input, button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
 
-        p {
-            color: gray;
-            margin-bottom: 20px;
-        }
+button {
+    background: #667eea;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            margin-bottom: 15px;
-        }
+button:hover {
+    background: #5a67d8;
+}
 
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background: #667eea;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+#loading {
+    display: none;
+    margin-top: 15px;
+}
 
-        button:hover {
-            background: #5a67d8;
-        }
+#result {
+    display: none;
+    margin-top: 20px;
+}
 
-        .footer {
-            margin-top: 15px;
-            font-size: 12px;
-            color: gray;
-        }
-    </style>
+img {
+    width: 100%;
+    border-radius: 10px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="card">
-    <h2>🎬 Video Downloader</h2>
+    <h2>🎬 Downloader</h2>
     <p>TikTok • Instagram • Facebook</p>
 
-    <form action="/download" method="post">
-        <input type="text" name="url" placeholder="Paste video link here..." required>
-        <button type="submit">Get Download Link</button>
-    </form>
+    <input type="text" id="url" placeholder="Paste link here...">
+    <button onclick="download()">Get Video</button>
 
-    <div class="footer">
-        Fast • Free • No Watermark*
+    <div id="loading">⏳ Processing...</div>
+
+    <div id="result">
+        <img id="thumb">
+        <a id="downloadBtn" target="_blank">
+            <button>Download Video</button>
+        </a>
     </div>
 </div>
+
+<script>
+function download() {
+    let url = document.getElementById("url").value;
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("result").style.display = "none";
+
+    fetch('/download', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: "url=" + encodeURIComponent(url)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("loading").style.display = "none";
+
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        document.getElementById("thumb").src = data.thumbnail;
+        document.getElementById("downloadBtn").href = data.video;
+        document.getElementById("result").style.display = "block";
+    });
+}
+</script>
 
 </body>
 </html>
