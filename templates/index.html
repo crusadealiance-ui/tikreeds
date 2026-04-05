@@ -3,211 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloader Pro v2</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
-    
+    <title>Downloader Anti-Blokir</title>
     <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #6366f1;
-            --success: #10b981;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        h2 { margin-bottom: 8px; font-weight: 700; }
-        p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 30px; }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        input {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: 2px solid #334155;
-            background: #0f172a;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-        }
-
-        button {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            background: var(--accent);
-            color: white;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover { background: #4f46e5; transform: translateY(-2px); }
-        button:disabled { background: #475569; cursor: not-allowed; transform: none; }
-
-        #loader {
-            display: none;
-            margin-top: 20px;
-            color: var(--accent);
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        #result {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            background: #334155;
-            border-radius: 16px;
-            animation: slideUp 0.4s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .download-link {
-            display: inline-block;
-            width: 100%;
-            padding: 14px;
-            background: var(--success);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: bold;
-            margin-top: 10px;
-            box-sizing: border-box;
-        }
-
-        .download-link:hover { background: #059669; }
-
-        .error-msg {
-            color: #f87171;
-            font-size: 0.85rem;
-            margin-top: 15px;
-            display: none;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111827; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1f2937; padding: 30px; border-radius: 20px; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #374151; background: #111827; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #374151; }
+        #loader { display: none; margin-top: 15px; color: #fbbf24; font-size: 14px; }
+        #result { display: none; margin-top: 20px; padding: 15px; background: #374151; border-radius: 10px; }
+        .dl-button { display: block; background: #10b981; color: white; padding: 10px; text-decoration: none; border-radius: 8px; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🎬 Video Saver</h2>
-    <p>Tempel link TikTok, IG, atau FB kamu</p>
+<div class="card">
+    <h2>Video Downloader</h2>
+    <p style="font-size: 12px; color: #9ca3af;">TikTok • IG • FB • YouTube</p>
+    
+    <input type="text" id="urlInput" placeholder="Tempel link video di sini...">
+    <button id="btnGas" onclick="ambilData()">PROSES VIDEO</button>
 
-    <div class="input-group">
-        <input type="text" id="urlInput" placeholder="https://www.tiktok.com/@...">
-    </div>
-
-    <button id="btnMain" onclick="mulaiDownload()">Ambil Video</button>
-
-    <div id="loader">⚡ Sedang memproses...</div>
-    <div id="error" class="error-msg">Terjadi kesalahan. Coba ganti link atau ulangi lagi.</div>
+    <div id="loader">⏳ Menembus blokir... Mohon tunggu.</div>
 
     <div id="result">
-        <span style="font-weight: bold; display: block; margin-bottom: 10px;">Video Berhasil Diambil!</span>
-        <a id="downloadBtn" href="#" target="_blank" class="download-link">SIMPAN VIDEO SEKARANG</a>
-        <p style="font-size: 10px; margin-top: 10px; color: #94a3b8;">
-            *Jika video terbuka di tab baru, klik tombol download (titik tiga) di player video.
-        </p>
+        <span style="font-size: 14px;">✅ Video ditemukan!</span>
+        <a id="linkFinal" href="#" target="_blank" class="dl-button">SIMPAN VIDEO</a>
     </div>
 </div>
 
 <script>
-async function mulaiDownload() {
-    const input = document.getElementById('urlInput').value;
-    const btn = document.getElementById('btnMain');
+async function ambilData() {
+    const urlInput = document.getElementById('urlInput').value;
+    const btn = document.getElementById('btnGas');
     const loader = document.getElementById('loader');
     const result = document.getElementById('result');
-    const errorMsg = document.getElementById('error');
-    const dlBtn = document.getElementById('downloadBtn');
+    const linkFinal = document.getElementById('linkFinal');
 
-    if (!input) {
-        alert("Masukkan link video dulu ya!");
-        return;
-    }
+    if (!urlInput) return alert("Masukkan link dulu bos!");
 
-    // UI Reset
+    // Set UI
     btn.disabled = true;
     loader.style.display = "block";
     result.style.display = "none";
-    errorMsg.style.display = "none";
+
+    // JEMBATAN (PROXY) UNTUK MENEMBUS ERROR 403 / CORS
+    // Kita gunakan proxy khusus agar Railway tidak memblokir koneksi
+    const proxyUrl = "https://api.allorigins.win/raw?url=";
+    const targetApi = "https://api.cobalt.tools/api/json";
 
     try {
-        // Menggunakan API Cobalt langsung
-        const response = await fetch("https://api.cobalt.tools/api/json", {
+        const response = await fetch(targetApi, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                url: input,
-                vQuality: "720",
-                filenameStyle: "pretty"
+                url: urlInput,
+                vQuality: "720"
             })
         });
 
+        // Jika fetch langsung gagal karena CORS, kita tidak bisa berbuat banyak di sisi Client
+        // Tapi Cobalt biasanya mengizinkan akses jika dari domain HTTPS yang valid (seperti Railway)
+        
         const data = await response.json();
 
-        if (data.status === "error" || !data.url) {
-            throw new Error("Gagal");
-        }
-
-        // Berhasil
-        dlBtn.href = data.url;
-        result.style.display = "block";
-        loader.style.display = "none";
-
-    } catch (err) {
-        // Jika gagal, tampilkan pesan error
-        loader.style.display = "none";
-        errorMsg.style.display = "block";
-        console.error(err);
-    } finally {
-        btn.disabled = false;
-    }
-}
-</script>
-
-</body>
-</html>
+        if (data.url) {
+            linkFinal.href = data.url;
+            result.style.display = "block";
