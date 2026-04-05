@@ -1,16 +1,13 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request
 import yt_dlp
-import os
 
 app = Flask(__name__)
 
-# Halaman utama
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
-# Download video
 @app.route('/download', methods=['POST'])
 def download():
     url = request.form.get('url')
@@ -20,26 +17,23 @@ def download():
 
     try:
         ydl_opts = {
-            'format': 'mp4',
-            'outtmpl': '/tmp/video.%(ext)s',
-            'noplaylist': True,
-            'quiet': True
+            'quiet': True,
+            'skip_download': True
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
+            info = ydl.extract_info(url, download=False)
+            video_url = info.get('url')
 
-        # Cari file di /tmp
-        for file in os.listdir('/tmp'):
-            if file.startswith('video'):
-                return send_file(f'/tmp/{file}', as_attachment=True)
-
-        return "Gagal download"
+        return f'''
+        <h3>Link Video:</h3>
+        <a href="{video_url}" target="_blank">Download Video</a>
+        '''
 
     except Exception as e:
         return f"Error: {str(e)}"
 
 
-# WAJIB untuk Railway
+import os
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
