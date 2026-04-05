@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import yt_dlp
 
 app = Flask(__name__)
@@ -13,7 +13,7 @@ def download():
     url = request.form.get('url')
 
     if not url:
-        return "Masukkan URL"
+        return jsonify({"error": "URL kosong"})
 
     try:
         ydl_opts = {
@@ -24,14 +24,15 @@ def download():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             video_url = info.get('url')
+            thumbnail = info.get('thumbnail')
 
-        return f'''
-        <h3>Link Video:</h3>
-        <a href="{video_url}" target="_blank">Download Video</a>
-        '''
+        return jsonify({
+            "video": video_url,
+            "thumbnail": thumbnail
+        })
 
     except Exception as e:
-        return f"Error: {str(e)}"
+        return jsonify({"error": str(e)})
 
 
 import os
