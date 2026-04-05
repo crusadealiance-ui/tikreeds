@@ -1,23 +1,23 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 import yt_dlp
 import os
 
 app = Flask(__name__)
 
 
-# =========================
-# ROUTE HOME
-# =========================
+# ======================
+# HOME
+# ======================
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
-# =========================
-# ROUTE DOWNLOAD (API)
-# =========================
-@app.route('/download', methods=['POST'])
-def download():
+# ======================
+# GET VIDEO LINK
+# ======================
+@app.route('/get-link', methods=['POST'])
+def get_link():
     url = request.form.get('url')
 
     if not url:
@@ -27,13 +27,18 @@ def download():
         ydl_opts = {
             'quiet': True,
             'skip_download': True,
-            'nocheckcertificate': True
+            'format': 'best',
+            'nocheckcertificate': True,
+            'geo_bypass': True,
+            'geo_bypass_country': 'US',
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0'
+            }
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 
-            # Ambil link video terbaik
             video_url = None
 
             if 'url' in info:
@@ -47,34 +52,28 @@ def download():
             thumbnail = info.get('thumbnail', '')
 
         if not video_url:
-            return jsonify({"error": "Gagal mengambil video"})
+            return jsonify({"error": "Gagal ambil video"})
 
         return jsonify({
-            "status": "success",
             "video": video_url,
             "thumbnail": thumbnail
         })
 
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "error": str(e)
-        })
+        return jsonify({"error": str(e)})
 
 
-# =========================
-# HEALTH CHECK (OPSIONAL)
-# =========================
-@app.route('/health')
-def health():
-    return "OK"
+# ======================
+# DOWNLOAD (1x klik)
+# ======================
+@app.route('/download')
+def download():
+    video_url = request.args.get('url')
+    return redirect(video_url)
 
 
-# =========================
-# RUN (WAJIB UNTUK RAILWAY)
-# =========================
+# ======================
+# RUN (Railway)
+# ======================
 if __name__ == '__main__':
-    app.run(
-        host='0.0.0.0',
-        port=int(os.environ.get("PORT", 5000))
-    )
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
